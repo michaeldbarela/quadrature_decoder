@@ -30,7 +30,6 @@ architecture rtl of quadrature_encoder is
     signal count_en     : std_logic;
     signal direction    : std_logic;
     signal count_q      : std_logic_vector(count'LENGTH-1 downto 0);
-    signal count_d      : std_logic_vector(count'LENGTH-1 downto 0);
 
 begin
 ----------------------------------------------------------------------------------
@@ -42,7 +41,6 @@ begin
             if(reset = '0') then
                 encA_q      <= (OTHERS=>'0');
                 encB_q      <= (OTHERS=>'0');
-                count       <= (OTHERS=>'0');
                 count_q     <= (OTHERS=>'0');
             else
                 encA_q      <= encA_d;
@@ -51,9 +49,9 @@ begin
                 -- determine whether counter increments or decrements
                 if(count_en = '1') then
                     if(direction = '1') then
-                        count_q   <= std_logic_vector(to_unsigned(to_integer(unsigned(count_d)) + 1, count'LENGTH));
+                        count_q   <= std_logic_vector(to_unsigned(to_integer(unsigned(count_q)) + 1, count'LENGTH));
                     else
-                        count_q   <= std_logic_vector(to_unsigned(to_integer(unsigned(count_d)) - 1, count'LENGTH));
+                        count_q   <= std_logic_vector(to_unsigned(to_integer(unsigned(count_q)) - 1, count'LENGTH));
                     end if;
                 end if;
             end if;
@@ -65,11 +63,10 @@ begin
 ----------------------------------------------------------------------------------
     encA_d      <= encA_q(1 downto 0) & enc(0);
     encB_d      <= encB_q(1 downto 0) & enc(1);
-    count_d     <= count_q;
     -- if enabled then count may increment or decrement
     count_en    <= encA_q(1) XOR encA_q(2) XOR encB_q(1) XOR encB_q(2);
     -- 1 means forward; 0 means backward
-    direction   <= encA_q(2) XOR encB_q(2);
+    direction   <= encA_q(1) XOR encB_q(2);
     -- output
     count       <= count_q;
 
